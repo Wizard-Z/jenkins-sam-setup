@@ -1,6 +1,6 @@
 
 exports.handler = async function (event) {
-  console.log("Processing received event, Step function invoked", { event });
+  console.log("Processing received event from stepfunction. EB to StepFunction to Lambda", { event });
 
 
   const result = {
