@@ -1,5 +1,5 @@
 {
-    "Comment": "State function that will invoke lambda function and pass event received from EventBridge",
+    "Comment": "State function that will invoke lambda function and pass event received from EventBridge !",
     "StartAt": "DynamoDB GetItem",
     "States": {
       "DynamoDB GetItem": {

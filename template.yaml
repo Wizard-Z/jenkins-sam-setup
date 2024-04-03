@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  Stack to deploy lambda that handles posidex dedupe event published from salesforce. Deploys the Lambda function 
+  Stack to deploy lambda that handles event received from AWS Step Function. Deploys the Lambda function 
   and configures the event that triggers it.
 
 Resources:
