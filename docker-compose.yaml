@@ -1,0 +1,16 @@
+version: "3.9"
+services:
+  jenkins:
+    network_mode: host
+    image: sourabhhbar/jenkins-agent-image:1.0.2-sam
+    container_name: jenkins
+    # ports:
+    #   - 8088:8080
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /usr/bin/docker:/usr/bin/docker
+      - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+  jenkins_home:
+    external: true

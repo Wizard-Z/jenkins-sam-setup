@@ -1,0 +1,69 @@
+{
+    "Comment": "State function that will invoke lambda function and pass event received from EventBridge",
+    "StartAt": "DynamoDB GetItem",
+    "States": {
+      "DynamoDB GetItem": {
+        "Type": "Task",
+        "Resource": "arn:aws:states:::dynamodb:getItem",
+        "Parameters": {
+          "TableName": "EventStore",
+          "Key": {
+            "eventId.$": "$.transactionId"
+          }
+        },
+        "Next": "Should Process Event ?",
+        "ResultPath": "$.dbResponse"
+      },
+      "Should Process Event ?": {
+        "Type": "Choice",
+        "Choices": [
+          {
+            "Or": [
+              {
+                "Not": {
+                  "Variable": "$.dbResponse.Item",
+                  "IsPresent": true
+                }
+              },
+              {
+                "Not": {
+                  "Variable": "$.dbResponse.Item.status.S",
+                  "StringEquals": "SUCCESS"
+                }
+              }
+            ],
+            "Next": "Invoke Consumer Function",
+            "Comment": "Invoke Function"
+          }
+        ],
+        "Default": "Pass"
+      },
+      "Pass": {
+        "Type": "Pass",
+        "End": true
+      },
+      "Invoke Consumer Function": {
+        "Type": "Task",
+        "Resource": "arn:aws:states:::lambda:invoke",
+        "OutputPath": "$.Payload",
+        "Parameters": {
+          "Payload.$": "$",
+          "FunctionName": "${MyFunctionArn}"
+        },
+        "Retry": [
+          {
+            "ErrorEquals": [
+              "Lambda.ServiceException",
+              "Lambda.AWSLambdaException",
+              "Lambda.SdkClientException",
+              "Lambda.TooManyRequestsException"
+            ],
+            "IntervalSeconds": 1,
+            "MaxAttempts": 3,
+            "BackoffRate": 2
+          }
+        ],
+        "End": true
+      }
+    }
+  }

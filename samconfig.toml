@@ -1,0 +1,10 @@
+version = 0.1
+[dev.deploy.parameters]
+stack_name = "jenkins-sam-ci"
+resolve_s3 = false
+s3_bucket = "samclibucketz12"
+s3_prefix = "jenkins-sam-ci"
+region = "ap-south-1"
+confirm_changeset = false
+image_repositories = []
+

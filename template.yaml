@@ -1,0 +1,82 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Stack to deploy lambda that handles posidex dedupe event published from salesforce. Deploys the Lambda function 
+  and configures the event that triggers it.
+
+Resources:
+  ConsumerServiceFn:
+    Type: AWS::Serverless::Function 
+    Properties:
+      FunctionName: EventConsumerHandler
+      CodeUri: ./src
+      Description: Dummy function to mimic consumer service handling events received from step function
+      MemorySize: 128
+      Timeout: 10
+      Handler: index.handler
+      Runtime: nodejs16.x
+      Architectures:
+        - x86_64
+      EphemeralStorage:
+        Size: 512
+      Environment:
+        Variables:
+          key: value
+      Layers:
+        - arn:aws:lambda:ap-south-1:813997507867:layer:AX-SFDC-Event-util-layer:4
+      Role: arn:aws:iam::813997507867:role/service-role/crm_lead_update_POC-role-sof08pfl
+      RuntimeManagementConfig:
+        UpdateRuntimeOn: Auto
+      SnapStart:
+        ApplyOn: None
+      PackageType: Zip
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-0830b26d18b9f5184
+        SubnetIds:
+          - subnet-0d325a7c160559955
+          - subnet-02a0b8001db3e1a38
+  
+  InvokeStepFnRule:
+    Type: AWS::Events::Rule
+    Properties:
+      EventBusName: SourceEventBus
+      EventPattern:
+        detail-type:
+          - invokeStep
+      Name: invokeStep
+      State: ENABLED
+      Targets:
+        - Id: myRuleMatcher
+          Arn: !GetAtt EventConsumerStateMachine.Arn
+          RoleArn: arn:aws:iam::813997507867:role/service-role/Amazon_EventBridge_Invoke_Step_Functions_2121087639
+          InputTransformer:
+            InputPathsMap:
+              transactionId: $.detail.transactionId
+            InputTemplate: |-
+              {
+                "transactionId" : "<transactionId>",
+                "customKey": "dummyValue"
+              }
+
+  EventConsumerStateMachine:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      DefinitionUri: StateMachineConsumer.asl.json
+      Role: arn:aws:iam::813997507867:role/service-role/StepFunctions-EventConsumerStateMachine-role-veq4pzrbu
+      Tracing:
+        Enabled: true
+      DefinitionSubstitutions:
+        MyFunctionArn: !GetAtt ConsumerServiceFn.Arn
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+
+  ConsumerServiceFn:
+    Description: "Lambda Function ARN"
+    Value: !GetAtt ConsumerServiceFn.Arn
+  StateMachineArn:
+    Description: "State Machine Arn"
+    Value: !GetAtt EventConsumerStateMachine.Arn
