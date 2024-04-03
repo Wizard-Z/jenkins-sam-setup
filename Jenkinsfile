@@ -7,16 +7,8 @@ pipeline {
     SAM_TEMPLATE = 'template.yaml'
     SAM_CONFIG = 'samconfig.toml'
     MAIN_BRANCH = 'main'
-    TESTING_STACK_NAME = 'sfdcPlatform-posidex'
     TESTING_PIPELINE_EXECUTION_ROLE = 'arn:aws:iam::813997507867:role/jenkins-aws-sam-execution-role'
-    TESTING_CLOUDFORMATION_EXECUTION_ROLE = 'arn:aws:iam::813997507867:user/restrictive-readOnly'
-    TESTING_ARTIFACTS_BUCKET = 'samclibucketz12'
     TESTING_REGION = 'ap-south-1'
-    PROD_STACK_NAME = 'sfdcPlatform-posidex'
-    PROD_PIPELINE_EXECUTION_ROLE = 'arn:aws:iam::813997507867:user/restrictive-readOnly'
-    PROD_CLOUDFORMATION_EXECUTION_ROLE = 'arn:aws:iam::813997507867:user/restrictive-readOnly'
-    PROD_ARTIFACTS_BUCKET = 'samclibucketz12'
-    PROD_REGION = 'ap-south-1'
   }
   stages {
     // uncomment and modify the following step for running the unit-tests
